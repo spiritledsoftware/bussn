@@ -1,0 +1,40 @@
+{
+  "name": "@bussn/monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "keywords": [],
+  "license": "MIT",
+  "author": "Spirit-Led Software LLC <social@spiritledsoftware.com>",
+  "type": "module",
+  "scripts": {
+    "build": "turbo build",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "prepare": "husky && effect-tsgo patch --typescript --oxlint",
+    "test": "vitest && turbo test",
+    "typecheck": "tsc --noEmit && turbo typecheck",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@effect/tsgo": "0.36.5",
+    "@oxlint/plugins": "1.78.0",
+    "@types/node": "^26.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "oxfmt": "^0.63.0",
+    "oxlint": "1.78.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "turbo": "^2.10.10",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.21.0",
+      "onFail": "download"
+    }
+  }
+}

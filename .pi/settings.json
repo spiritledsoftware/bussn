@@ -1,0 +1,71 @@
+{
+  "formatter": {
+    "formatters": {
+      "oxfmt": {
+        "command": "pnpm",
+        "args": ["exec", "oxfmt", "--no-error-on-unmatched-pattern", "$FILE"],
+        "files": {
+          "extensions": [
+            ".js",
+            ".jsx",
+            ".mjs",
+            ".cjs",
+            ".ts",
+            ".tsx",
+            ".mts",
+            ".cts",
+            ".json",
+            ".jsonc",
+            ".md",
+            ".yml",
+            ".yaml",
+            ".css"
+          ]
+        },
+        "rootMarkers": [".oxfmtrc.json", "package.json", ".git"]
+      }
+    }
+  },
+  "lsp": {
+    "servers": {
+      "typescript": {
+        "command": "pnpm",
+        "args": ["exec", "tsc", "--lsp", "--stdio"],
+        "languages": [
+          {
+            "extensions": [".ts", ".mts", ".cts"],
+            "languageId": "typescript"
+          },
+          {
+            "extensions": [".tsx"],
+            "languageId": "typescriptreact"
+          }
+        ],
+        "rootMarkers": ["tsconfig.json", "package.json", ".git"]
+      },
+      "oxlint": {
+        "command": "pnpm",
+        "args": ["exec", "oxlint", "--lsp"],
+        "languages": [
+          {
+            "extensions": [".js", ".mjs", ".cjs"],
+            "languageId": "javascript"
+          },
+          {
+            "extensions": [".jsx"],
+            "languageId": "javascriptreact"
+          },
+          {
+            "extensions": [".ts", ".mts", ".cts"],
+            "languageId": "typescript"
+          },
+          {
+            "extensions": [".tsx"],
+            "languageId": "typescriptreact"
+          }
+        ],
+        "rootMarkers": [".oxlintrc.json", "package.json", ".git"]
+      }
+    }
+  }
+}
