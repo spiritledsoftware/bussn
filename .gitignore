@@ -1,6 +1,9 @@
 # Node Modules
 node_modules/
 
+# Reference Repos
+.repos/
+
 # Build Outputs
 dist/
 
