@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bussn Effect API prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1c2430;
+        --muted: #667085;
+        --line: #d8dee8;
+        --paper: #f4f6f9;
+        --panel: #ffffff;
+        --accent: #3559c7;
+        --accent-soft: #e9edff;
+        --good: #18794e;
+        --warn: #9a6700;
+        --bad: #b42318;
+        --code: #111827;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          15px/1.5 ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      main {
+        width: min(1480px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 64px;
+      }
+
+      header {
+        max-width: 920px;
+        margin-bottom: 24px;
+      }
+
+      .prototype-label {
+        display: inline-flex;
+        margin-bottom: 12px;
+        padding: 4px 9px;
+        border: 1px solid #e5a4a0;
+        border-radius: 999px;
+        background: #fff0ef;
+        color: var(--bad);
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+        font-size: clamp(30px, 4vw, 46px);
+        line-height: 1.08;
+        letter-spacing: -0.035em;
+      }
+
+      h2 {
+        margin-bottom: 16px;
+        font-size: 20px;
+        letter-spacing: -0.015em;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+
+      .lede {
+        max-width: 820px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.8fr);
+        gap: 20px;
+        align-items: start;
+      }
+
+      .stack {
+        display: grid;
+        gap: 20px;
+      }
+
+      .panel {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+        box-shadow: 0 4px 18px rgb(30 41 59 / 0.05);
+      }
+
+      .panel-body {
+        padding: 20px;
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .panel-header h2 {
+        margin: 0;
+      }
+
+      .state-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .state-card {
+        min-height: 84px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        background: #fbfcfe;
+      }
+
+      .state-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.045em;
+        text-transform: uppercase;
+      }
+
+      .state-card strong {
+        display: block;
+        margin-top: 7px;
+        font-size: 15px;
+        overflow-wrap: anywhere;
+      }
+
+      .result {
+        margin-bottom: 18px;
+        padding: 14px 16px;
+        border-left: 4px solid var(--accent);
+        border-radius: 8px;
+        background: var(--accent-soft);
+      }
+
+      .result.good {
+        border-color: var(--good);
+        background: #eaf7f0;
+      }
+
+      .result.warn {
+        border-color: var(--warn);
+        background: #fff6df;
+      }
+
+      .result.bad {
+        border-color: var(--bad);
+        background: #fff0ef;
+      }
+
+      .result p {
+        margin-bottom: 5px;
+      }
+
+      .result code,
+      .callout code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px;
+      }
+
+      .controls {
+        display: grid;
+        gap: 14px;
+      }
+
+      .control-group {
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .control-group:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .action,
+      .tab,
+      .step {
+        border: 1px solid #b8c2d3;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        cursor: pointer;
+        font-weight: 650;
+      }
+
+      .action {
+        padding: 8px 11px;
+      }
+
+      .action:hover,
+      .tab:hover,
+      .step:hover:not(:disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .action.primary {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: white;
+      }
+
+      .action.danger {
+        border-color: #e5a4a0;
+        color: var(--bad);
+      }
+
+      .reset {
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .deliveries {
+        display: grid;
+        gap: 9px;
+        margin-top: 18px;
+      }
+
+      .delivery {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px 16px;
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      .delivery small {
+        color: var(--muted);
+      }
+
+      .badge {
+        align-self: start;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: #eef1f5;
+        color: #475467;
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .badge.claimed {
+        background: #fff6df;
+        color: var(--warn);
+      }
+
+      .badge.done {
+        background: #eaf7f0;
+        color: var(--good);
+      }
+
+      .badge.available {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .tab {
+        flex: 0 0 auto;
+        padding: 7px 10px;
+      }
+
+      .tab.active {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      .scenario-copy {
+        margin: 14px 0;
+        color: var(--muted);
+      }
+
+      .steps {
+        display: grid;
+        gap: 8px;
+      }
+
+      .step {
+        width: 100%;
+        padding: 10px 12px;
+        text-align: left;
+      }
+
+      .step.current {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-soft);
+      }
+
+      .step:disabled {
+        cursor: default;
+        opacity: 0.5;
+      }
+
+      .architecture {
+        display: grid;
+        gap: 10px;
+      }
+
+      .architecture article {
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      .architecture p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      pre {
+        overflow: auto;
+        margin: 0;
+        padding: 18px;
+        background: var(--code);
+        color: #e5e7eb;
+        font:
+          12px/1.55 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+        tab-size: 2;
+      }
+
+      .callout {
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fbfcfe;
+      }
+
+      .callout p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .log {
+        display: grid;
+        gap: 6px;
+        max-height: 290px;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+      }
+
+      .log div {
+        padding-bottom: 6px;
+        border-bottom: 1px solid #edf0f4;
+      }
+
+      .log time {
+        color: var(--muted);
+      }
+
+      .alternatives {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .alternatives article {
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      .alternatives p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 1050px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .state-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 620px) {
+        main {
+          width: min(100% - 20px, 1480px);
+          padding-top: 20px;
+        }
+
+        .state-grid,
+        .alternatives {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="prototype-label">Prototype — keep off main</span>
+        <h1>Does this Effect interface carry the whole Broker contract?</h1>
+        <p class="lede">
+          Drive publication, scoped consumption, Claim renewal, release, acknowledgement, Relay
+          loss, and Subscription recreation. The prototype tests whether five explicit Broker
+          operations and one Delivery capability are enough without leaking Store or Relay mechanics
+          to callers.
+        </p>
+      </header>
+
+      <div class="layout">
+        <section class="stack">
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Current Broker state</h2>
+              <button class="reset" id="reset">Reset</button>
+            </div>
+            <div class="panel-body">
+              <div class="state-grid" id="state-grid"></div>
+              <div class="result" id="result"></div>
+              <div class="controls">
+                <section class="control-group">
+                  <h3>Subscription and publication</h3>
+                  <div class="button-row">
+                    <button class="action" data-action="CREATE_SUBSCRIPTION">
+                      Create Subscription
+                    </button>
+                    <button class="action danger" data-action="DELETE_SUBSCRIPTION">
+                      Delete Subscription
+                    </button>
+                    <button class="action" data-action="PUBLISH">Publish Message</button>
+                    <button class="action" data-action="RETRY_PUBLICATION">
+                      Retry same publication
+                    </button>
+                    <button class="action danger" data-action="CONFLICT_PUBLICATION">
+                      Reuse ID with new payload
+                    </button>
+                  </div>
+                </section>
+                <section class="control-group">
+                  <h3>Consumer and Delivery</h3>
+                  <div class="button-row">
+                    <button class="action primary" data-action="PULL">Pull next Delivery</button>
+                    <button class="action" data-action="RENEW">Renew Claim</button>
+                    <button class="action" data-action="ACKNOWLEDGE">Acknowledge</button>
+                    <button class="action" data-action="ACKNOWLEDGE_STALE">
+                      Old handler acknowledges
+                    </button>
+                    <button class="action" data-action="RELEASE">Release now</button>
+                    <button class="action" data-action="RELEASE_DELAYED">Release after 30s</button>
+                  </div>
+                </section>
+                <section class="control-group">
+                  <h3>Time and Relay</h3>
+                  <div class="button-row">
+                    <button class="action" data-action="ADVANCE_31">Advance Store time 31s</button>
+                    <button class="action" data-action="DROP_WAKEUP">Drop next wake-up</button>
+                    <button class="action danger" data-action="DISCONNECT">Disconnect Relay</button>
+                    <button class="action" data-action="RECONNECT">Reconnect Relay</button>
+                  </div>
+                </section>
+              </div>
+              <div class="deliveries" id="deliveries"></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Guided walkthroughs</h2></div>
+            <div class="panel-body">
+              <div class="tabs" id="tabs"></div>
+              <p class="scenario-copy" id="scenario-copy"></p>
+              <div class="steps" id="steps"></div>
+            </div>
+          </article>
+        </section>
+
+        <aside class="stack">
+          <article class="panel">
+            <div class="panel-header"><h2>Recommended seam</h2></div>
+            <div class="panel-body architecture">
+              <article>
+                <h3>Broker — application-facing Module</h3>
+                <p>
+                  Five explicit operations. It validates, copies, polls, and hides
+                  local-versus-remote wiring.
+                </p>
+              </article>
+              <article>
+                <h3>Store — durable authority Adapter</h3>
+                <p>
+                  Owns Message and Delivery commits, Store time, Claim fencing, limits, retention,
+                  and status.
+                </p>
+              </article>
+              <article>
+                <h3>Relay — transient transport Adapter</h3>
+                <p>
+                  Carries request/response traffic and best-effort wake-ups. It cannot affect
+                  correctness.
+                </p>
+              </article>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Effect interface sketch</h2></div>
+            <pre><code>export interface Broker {
+  publish(input: Publication):
+    Effect&lt;Message, PublishError&gt;
+
+  createSubscription(input: CreateSubscription):
+    Effect&lt;Subscription, SubscriptionError&gt;
+
+  deleteSubscription(id: SubscriptionId):
+    Effect&lt;void, DeleteSubscriptionError&gt;
+
+  openConsumer(options: ConsumerOptions):
+    Effect&lt;Consumer, OpenConsumerError, Scope&gt;
+
+  subscriptionStatus(id: SubscriptionId):
+    Effect&lt;SubscriptionStatus, StatusError&gt;
+}
+
+export interface Consumer {
+  readonly deliveries:
+    Stream&lt;ClaimedDelivery, ConsumeError&gt;
+}
+
+export interface ClaimedDelivery {
+  readonly deliveryId: DeliveryId
+  readonly message: Message
+  readonly attempt: number
+  readonly claimExpiresAt: DateTime.Utc
+
+  readonly renew:
+    Effect&lt;DateTime.Utc, ClaimError&gt;
+
+  readonly release: (options?: {
+    readonly delay?: Duration
+  }) =&gt; Effect&lt;void, ClaimError&gt;
+
+  readonly acknowledge:
+    Effect&lt;void, ClaimError&gt;
+}</code></pre>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Last Effect-shaped call</h2></div>
+            <div class="panel-body">
+              <div class="callout"><code id="last-call"></code></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Why this hybrid</h2></div>
+            <div class="panel-body alternatives">
+              <article>
+                <h3>Two-method handles</h3>
+                <p>
+                  Very small, but lifecycle and status become hidden behind overloaded capability
+                  objects.
+                </p>
+              </article>
+              <article>
+                <h3>Automatic consume</h3>
+                <p>
+                  Convenient, but forces acknowledgement and handler-failure policy into the Broker.
+                </p>
+              </article>
+              <article>
+                <h3>Explicit ports</h3>
+                <p>
+                  Best adapter separation. Retained internally for Store and Relay rather than
+                  exposed to callers.
+                </p>
+              </article>
+              <article>
+                <h3>Primitive stream</h3>
+                <p>
+                  Lets event, command, job, and plugin libraries add policy without changing Broker
+                  core.
+                </p>
+              </article>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>State log</h2></div>
+            <div class="panel-body"><div class="log" id="log"></div></div>
+          </article>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      const BrokerModel = (() => {
+        const publication = (payload = '{"orderId":"order-1"}') => ({
+          messageId: "message-order-1",
+          destination: "orders",
+          payloadType: "order.created",
+          payloadSchemaVersion: "1",
+          payloadContentType: "application/json",
+          metadata: {},
+          payload,
+        });
+
+        const initial = () => ({
+          now: 0,
+          subscription: null,
+          messages: [],
+          deliveries: [],
+          consumer: { id: "consumer-1", connected: true, maximumClaims: 1 },
+          relay: { connected: true, dropNextWakeup: false, wakeups: [] },
+          currentHandle: null,
+          staleHandles: [],
+          counters: { subscription: 0, message: 1, delivery: 0, claim: 0 },
+          last: {
+            tone: "info",
+            text: "Create a Subscription, publish a Message, then pull its Delivery.",
+            call: "yield* broker.createSubscription({ name, destination })",
+          },
+          log: [{ at: 0, text: "Prototype reset" }],
+        });
+
+        const copy = (value) => structuredClone(value);
+        const log = (state, text) => state.log.unshift({ at: state.now, text });
+        const result = (state, tone, text, call) => {
+          state.last = { tone, text, call };
+          log(state, text);
+        };
+
+        const activeClaim = (state, delivery, token) =>
+          delivery?.claim && delivery.claim.token === token && delivery.claim.expiresAt > state.now;
+
+        const deliveryStatus = (state, delivery) => {
+          if (delivery.acknowledged) return "acknowledged";
+          if (delivery.claim && delivery.claim.expiresAt > state.now) return "claimed";
+          if (delivery.availableAt > state.now) return "delayed";
+          return delivery.claim ? "available after expiry" : "available";
+        };
+
+        const samePublication = (left, right) =>
+          left.destination === right.destination &&
+          left.payloadType === right.payloadType &&
+          left.payloadSchemaVersion === right.payloadSchemaVersion &&
+          left.payloadContentType === right.payloadContentType &&
+          JSON.stringify(left.metadata) === JSON.stringify(right.metadata) &&
+          left.payload === right.payload;
+
+        const notify = (state, subscriptionId) => {
+          if (!state.relay.connected || state.relay.dropNextWakeup) {
+            state.relay.dropNextWakeup = false;
+            log(state, `Wake-up for ${subscriptionId} was lost; Store state is unchanged`);
+            return;
+          }
+          if (!state.relay.wakeups.includes(subscriptionId))
+            state.relay.wakeups.push(subscriptionId);
+        };
+
+        const publish = (state, input) => {
+          const existing = state.messages.find((message) => message.messageId === input.messageId);
+          if (existing) {
+            if (!samePublication(existing, input)) {
+              result(
+                state,
+                "bad",
+                `Publication conflict: ${input.messageId} already has different content`,
+                "yield* broker.publish(input) // PublicationConflict",
+              );
+              return;
+            }
+            result(
+              state,
+              "good",
+              `Idempotent retry returned the original Message from t=${existing.publishedAt / 1000}s`,
+              "yield* broker.publish(input) // original Message",
+            );
+            return;
+          }
+
+          const message = { ...input, publishedAt: state.now };
+          state.messages.push(message);
+          if (state.subscription) {
+            const delivery = {
+              deliveryId: `delivery-${++state.counters.delivery}`,
+              subscriptionId: state.subscription.subscriptionId,
+              messageId: message.messageId,
+              attempt: 0,
+              availableAt: state.now,
+              claim: null,
+              acknowledged: false,
+              acknowledgedBy: null,
+            };
+            state.deliveries.push(delivery);
+            notify(state, state.subscription.subscriptionId);
+          }
+          result(
+            state,
+            "good",
+            state.subscription
+              ? `Message and Delivery committed together; wake-up is only a hint`
+              : `Message committed with no active Subscription`,
+            "yield* broker.publish(input)",
+          );
+        };
+
+        const reduce = (previous, action) => {
+          const state = copy(previous);
+
+          switch (action.type) {
+            case "CREATE_SUBSCRIPTION": {
+              if (state.subscription) {
+                result(
+                  state,
+                  "good",
+                  `Creation retry returned ${state.subscription.subscriptionId}`,
+                  "yield* broker.createSubscription({ name, destination })",
+                );
+                break;
+              }
+              state.subscription = {
+                subscriptionId: `subscription-${++state.counters.subscription}`,
+                name: "billing",
+                destination: "orders",
+              };
+              result(
+                state,
+                "good",
+                `Created ${state.subscription.subscriptionId}; it receives only later publications`,
+                'yield* broker.createSubscription({ name: "billing", destination: "orders" })',
+              );
+              break;
+            }
+
+            case "DELETE_SUBSCRIPTION": {
+              if (!state.subscription) {
+                result(
+                  state,
+                  "warn",
+                  "No active Subscription to delete",
+                  "yield* broker.deleteSubscription(id)",
+                );
+                break;
+              }
+              const deleted = state.subscription.subscriptionId;
+              for (const delivery of state.deliveries.filter(
+                (item) => item.subscriptionId === deleted,
+              )) {
+                if (delivery.claim)
+                  state.staleHandles.push({
+                    deliveryId: delivery.deliveryId,
+                    token: delivery.claim.token,
+                  });
+              }
+              state.deliveries = state.deliveries.filter((item) => item.subscriptionId !== deleted);
+              state.subscription = null;
+              state.currentHandle = null;
+              state.relay.wakeups = state.relay.wakeups.filter((id) => id !== deleted);
+              result(
+                state,
+                "good",
+                `Deleted ${deleted}, its unfinished Deliveries, and its active Claims`,
+                `yield* broker.deleteSubscription("${deleted}")`,
+              );
+              break;
+            }
+
+            case "PUBLISH": {
+              const nextId =
+                state.messages.length === 0
+                  ? "message-order-1"
+                  : `message-order-${++state.counters.message}`;
+              publish(state, {
+                ...publication(),
+                messageId: nextId,
+                payload: `{"orderId":"order-${state.counters.message}"}`,
+              });
+              break;
+            }
+
+            case "RETRY_PUBLICATION": {
+              const first = state.messages[0];
+              if (!first) {
+                result(
+                  state,
+                  "warn",
+                  "Publish a Message before retrying it",
+                  "yield* broker.publish(input)",
+                );
+                break;
+              }
+              publish(state, {
+                messageId: first.messageId,
+                destination: first.destination,
+                payloadType: first.payloadType,
+                payloadSchemaVersion: first.payloadSchemaVersion,
+                payloadContentType: first.payloadContentType,
+                metadata: first.metadata,
+                payload: first.payload,
+              });
+              break;
+            }
+
+            case "CONFLICT_PUBLICATION": {
+              const first = state.messages[0];
+              if (!first) {
+                result(
+                  state,
+                  "warn",
+                  "Publish a Message before testing a conflict",
+                  "yield* broker.publish(input)",
+                );
+                break;
+              }
+              publish(state, { ...first, payload: '{"orderId":"changed"}' });
+              break;
+            }
+
+            case "PULL": {
+              if (!state.relay.connected) {
+                result(
+                  state,
+                  "bad",
+                  "Relay unavailable; the remote Consumer will retry after reconnecting",
+                  "consumer.deliveries // RelayUnavailable",
+                );
+                break;
+              }
+              if (!state.subscription) {
+                result(
+                  state,
+                  "bad",
+                  "Subscription not found",
+                  "consumer.deliveries // SubscriptionNotFound",
+                );
+                break;
+              }
+              const activeCount = state.deliveries.filter(
+                (delivery) =>
+                  delivery.claim &&
+                  delivery.claim.consumerId === state.consumer.id &&
+                  delivery.claim.expiresAt > state.now,
+              ).length;
+              if (activeCount >= state.consumer.maximumClaims) {
+                result(
+                  state,
+                  "warn",
+                  "Consumer already holds its maximum active Claims",
+                  "consumer.deliveries // waits",
+                );
+                break;
+              }
+              const delivery = state.deliveries.find(
+                (item) =>
+                  !item.acknowledged &&
+                  item.availableAt <= state.now &&
+                  (!item.claim || item.claim.expiresAt <= state.now),
+              );
+              if (!delivery) {
+                result(
+                  state,
+                  "warn",
+                  "Nothing available; this is not an error",
+                  "consumer.deliveries // waits for pull interval or wake-up",
+                );
+                break;
+              }
+              if (delivery.claim)
+                state.staleHandles.push({
+                  deliveryId: delivery.deliveryId,
+                  token: delivery.claim.token,
+                });
+              delivery.claim = {
+                token: `claim-${++state.counters.claim}`,
+                consumerId: state.consumer.id,
+                expiresAt: state.now + 30_000,
+              };
+              delivery.attempt += 1;
+              state.currentHandle = {
+                deliveryId: delivery.deliveryId,
+                token: delivery.claim.token,
+              };
+              state.relay.wakeups = state.relay.wakeups.filter(
+                (id) => id !== state.subscription.subscriptionId,
+              );
+              result(
+                state,
+                "good",
+                `Claimed ${delivery.deliveryId}, attempt ${delivery.attempt}, until t=${delivery.claim.expiresAt / 1000}s`,
+                "yield* Stream.runForEach(consumer.deliveries, handle)",
+              );
+              break;
+            }
+
+            case "RENEW": {
+              const handle = state.currentHandle;
+              const delivery = state.deliveries.find(
+                (item) => item.deliveryId === handle?.deliveryId,
+              );
+              if (!handle || !activeClaim(state, delivery, handle.token)) {
+                result(
+                  state,
+                  "bad",
+                  "Claim is no longer active and cannot be renewed",
+                  "yield* delivery.renew // ClaimLost",
+                );
+                break;
+              }
+              delivery.claim.expiresAt = state.now + 30_000;
+              result(
+                state,
+                "good",
+                `Renewed Claim until t=${delivery.claim.expiresAt / 1000}s using Store time`,
+                "yield* delivery.renew",
+              );
+              break;
+            }
+
+            case "ACKNOWLEDGE": {
+              const handle = state.currentHandle;
+              const delivery = state.deliveries.find(
+                (item) => item.deliveryId === handle?.deliveryId,
+              );
+              if (delivery?.acknowledged && delivery.acknowledgedBy === handle?.token) {
+                result(
+                  state,
+                  "good",
+                  "Acknowledgement retry returned the original success",
+                  "yield* delivery.acknowledge",
+                );
+                break;
+              }
+              if (!handle || !activeClaim(state, delivery, handle.token)) {
+                result(
+                  state,
+                  "bad",
+                  "Only the active Claim may acknowledge",
+                  "yield* delivery.acknowledge // ClaimLost",
+                );
+                break;
+              }
+              delivery.acknowledged = true;
+              delivery.acknowledgedBy = handle.token;
+              result(
+                state,
+                "good",
+                `${delivery.deliveryId} is complete`,
+                "yield* delivery.acknowledge",
+              );
+              break;
+            }
+
+            case "ACKNOWLEDGE_STALE": {
+              const handle = state.staleHandles[0];
+              const delivery = state.deliveries.find(
+                (item) => item.deliveryId === handle?.deliveryId,
+              );
+              if (!handle || !activeClaim(state, delivery, handle.token)) {
+                result(
+                  state,
+                  "bad",
+                  "The old handler's Claim token is fenced out",
+                  "yield* oldDelivery.acknowledge // ClaimLost",
+                );
+                break;
+              }
+              break;
+            }
+
+            case "RELEASE":
+            case "RELEASE_DELAYED": {
+              const handle = state.currentHandle;
+              const delivery = state.deliveries.find(
+                (item) => item.deliveryId === handle?.deliveryId,
+              );
+              if (!handle || !activeClaim(state, delivery, handle.token)) {
+                result(
+                  state,
+                  "bad",
+                  "Only the active Claim may release",
+                  "yield* delivery.release() // ClaimLost",
+                );
+                break;
+              }
+              const delay = action.type === "RELEASE_DELAYED" ? 30_000 : 0;
+              delivery.claim = null;
+              delivery.availableAt = state.now + delay;
+              state.currentHandle = null;
+              if (delay === 0 && state.subscription)
+                notify(state, state.subscription.subscriptionId);
+              result(
+                state,
+                "good",
+                delay === 0
+                  ? `${delivery.deliveryId} is available again`
+                  : `${delivery.deliveryId} is delayed until t=${delivery.availableAt / 1000}s`,
+                delay === 0
+                  ? "yield* delivery.release()"
+                  : "yield* delivery.release({ delay: Duration.seconds(30) })",
+              );
+              break;
+            }
+
+            case "ADVANCE_31": {
+              state.now += 31_000;
+              result(
+                state,
+                "good",
+                `Store time is now t=${state.now / 1000}s`,
+                "yield* TestClock.adjust(Duration.seconds(31))",
+              );
+              break;
+            }
+
+            case "DROP_WAKEUP": {
+              state.relay.dropNextWakeup = true;
+              result(
+                state,
+                "warn",
+                "The next wake-up will be dropped",
+                "Relay failure is telemetry, not Store failure",
+              );
+              break;
+            }
+
+            case "DISCONNECT": {
+              state.relay.connected = false;
+              state.consumer.connected = false;
+              state.relay.wakeups = [];
+              result(
+                state,
+                "warn",
+                "Relay disconnected; durable Claims remain unchanged",
+                "Relay scope closed",
+              );
+              break;
+            }
+
+            case "RECONNECT": {
+              state.relay.connected = true;
+              state.consumer.connected = true;
+              result(
+                state,
+                "good",
+                "Relay reconnected; the Consumer can pull immediately",
+                "yield* broker.openConsumer(options)",
+              );
+              break;
+            }
+          }
+
+          return state;
+        };
+
+        return { initial, reduce, deliveryStatus };
+      })();
+
+      const scenarios = [
+        {
+          id: "happy",
+          name: "Happy path",
+          description:
+            "Create durable state, publish atomically, claim one Delivery, and acknowledge it explicitly.",
+          steps: [
+            ["Create Subscription", { type: "CREATE_SUBSCRIPTION" }],
+            ["Publish Message", { type: "PUBLISH" }],
+            ["Pull next Delivery", { type: "PULL" }],
+            ["Acknowledge", { type: "ACKNOWLEDGE" }],
+          ],
+        },
+        {
+          id: "lost-wakeup",
+          name: "Lost wake-up",
+          description:
+            "Drop the publication wake-up. A later pull still finds the authoritative Store state.",
+          steps: [
+            ["Create Subscription", { type: "CREATE_SUBSCRIPTION" }],
+            ["Drop next wake-up", { type: "DROP_WAKEUP" }],
+            ["Publish Message", { type: "PUBLISH" }],
+            ["Periodic pull", { type: "PULL" }],
+            ["Acknowledge", { type: "ACKNOWLEDGE" }],
+          ],
+        },
+        {
+          id: "expiry",
+          name: "Claim expiry",
+          description:
+            "Let one Claim expire, reclaim the same Delivery, then prove the old handler cannot acknowledge it.",
+          steps: [
+            ["Create Subscription", { type: "CREATE_SUBSCRIPTION" }],
+            ["Publish Message", { type: "PUBLISH" }],
+            ["First pull", { type: "PULL" }],
+            ["Advance Store time", { type: "ADVANCE_31" }],
+            ["Reclaim Delivery", { type: "PULL" }],
+            ["Old handler acknowledges", { type: "ACKNOWLEDGE_STALE" }],
+            ["Current handler acknowledges", { type: "ACKNOWLEDGE" }],
+          ],
+        },
+        {
+          id: "delay",
+          name: "Delayed retry",
+          description:
+            "Release with delay. Pulling early finds no work; Store time later makes it available.",
+          steps: [
+            ["Create Subscription", { type: "CREATE_SUBSCRIPTION" }],
+            ["Publish Message", { type: "PUBLISH" }],
+            ["Pull Delivery", { type: "PULL" }],
+            ["Release after 30s", { type: "RELEASE_DELAYED" }],
+            ["Pull too early", { type: "PULL" }],
+            ["Advance Store time", { type: "ADVANCE_31" }],
+            ["Pull delayed Delivery", { type: "PULL" }],
+          ],
+        },
+        {
+          id: "identity",
+          name: "Publication retry",
+          description:
+            "Retry identical content, then reuse the same Message ID with different content.",
+          steps: [
+            ["Publish Message", { type: "PUBLISH" }],
+            ["Retry identical publication", { type: "RETRY_PUBLICATION" }],
+            ["Reuse ID with new payload", { type: "CONFLICT_PUBLICATION" }],
+          ],
+        },
+        {
+          id: "recreate",
+          name: "Recreate Subscription",
+          description:
+            "Delete the exact Subscription generation, then recreate its name with a fresh ID.",
+          steps: [
+            ["Create Subscription", { type: "CREATE_SUBSCRIPTION" }],
+            ["Publish Message", { type: "PUBLISH" }],
+            ["Pull Delivery", { type: "PULL" }],
+            ["Delete Subscription", { type: "DELETE_SUBSCRIPTION" }],
+            ["Recreate same name", { type: "CREATE_SUBSCRIPTION" }],
+            ["Publish later Message", { type: "PUBLISH" }],
+          ],
+        },
+      ];
+
+      let state = BrokerModel.initial();
+      let activeScenario = 0;
+      let scenarioProgress = 0;
+
+      const formatTime = (milliseconds) => `t=${milliseconds / 1000}s`;
+
+      const render = () => {
+        const available = state.deliveries.filter((delivery) =>
+          BrokerModel.deliveryStatus(state, delivery).startsWith("available"),
+        ).length;
+        const claimed = state.deliveries.filter(
+          (delivery) => BrokerModel.deliveryStatus(state, delivery) === "claimed",
+        ).length;
+        const delayed = state.deliveries.filter(
+          (delivery) => BrokerModel.deliveryStatus(state, delivery) === "delayed",
+        ).length;
+
+        document.querySelector("#state-grid").innerHTML = [
+          ["Store time", formatTime(state.now)],
+          [
+            "Subscription",
+            state.subscription
+              ? `${state.subscription.name} · ${state.subscription.subscriptionId}`
+              : "None",
+          ],
+          [
+            "Consumer",
+            `${state.consumer.id} · ${state.relay.connected ? "connected" : "disconnected"}`,
+          ],
+          ["Relay wake-ups", state.relay.wakeups.length ? state.relay.wakeups.join(", ") : "None"],
+          ["Messages", String(state.messages.length)],
+          ["Available", String(available)],
+          ["Claimed", String(claimed)],
+          ["Delayed", String(delayed)],
+        ]
+          .map(
+            ([label, value]) =>
+              `<div class="state-card"><span>${label}</span><strong>${value}</strong></div>`,
+          )
+          .join("");
+
+        const resultElement = document.querySelector("#result");
+        resultElement.className = `result ${state.last.tone}`;
+        resultElement.innerHTML = `<p><strong>${state.last.text}</strong></p><code>${state.last.call}</code>`;
+        document.querySelector("#last-call").textContent = state.last.call;
+
+        const deliveries = document.querySelector("#deliveries");
+        deliveries.innerHTML = state.deliveries.length
+          ? state.deliveries
+              .map((delivery) => {
+                const status = BrokerModel.deliveryStatus(state, delivery);
+                const badgeClass =
+                  status === "acknowledged"
+                    ? "done"
+                    : status === "claimed"
+                      ? "claimed"
+                      : "available";
+                const claim = delivery.claim
+                  ? `Claim ${delivery.claim.token} · expires ${formatTime(delivery.claim.expiresAt)}`
+                  : `Available ${formatTime(delivery.availableAt)}`;
+                return `<article class="delivery">
+                  <div><strong>${delivery.deliveryId}</strong><br><small>${delivery.messageId} · attempt ${delivery.attempt} · ${claim}</small></div>
+                  <span class="badge ${badgeClass}">${status}</span>
+                </article>`;
+              })
+              .join("")
+          : '<div class="callout"><p>No Deliveries. Publish after creating a Subscription.</p></div>';
+
+        document.querySelector("#log").innerHTML = state.log
+          .slice(0, 14)
+          .map((entry) => `<div><time>${formatTime(entry.at)}</time> ${entry.text}</div>`)
+          .join("");
+      };
+
+      const renderScenario = () => {
+        document.querySelector("#tabs").innerHTML = scenarios
+          .map(
+            (scenario, index) =>
+              `<button class="tab ${index === activeScenario ? "active" : ""}" data-scenario="${index}">${scenario.name}</button>`,
+          )
+          .join("");
+        const scenario = scenarios[activeScenario];
+        document.querySelector("#scenario-copy").textContent = scenario.description;
+        document.querySelector("#steps").innerHTML = scenario.steps
+          .map(([label], index) => {
+            const complete = index < scenarioProgress;
+            const current = index === scenarioProgress;
+            return `<button class="step ${current ? "current" : ""}" data-step="${index}" ${current ? "" : "disabled"}>
+              ${complete ? "✓" : `${index + 1}.`} ${label}
+            </button>`;
+          })
+          .join("");
+      };
+
+      const dispatch = (action) => {
+        state = BrokerModel.reduce(state, action);
+        render();
+      };
+
+      document.addEventListener("click", (event) => {
+        const actionButton = event.target.closest("[data-action]");
+        if (actionButton) dispatch({ type: actionButton.dataset.action });
+
+        const tab = event.target.closest("[data-scenario]");
+        if (tab) {
+          activeScenario = Number(tab.dataset.scenario);
+          scenarioProgress = 0;
+          state = BrokerModel.initial();
+          render();
+          renderScenario();
+        }
+
+        const step = event.target.closest("[data-step]");
+        if (step && Number(step.dataset.step) === scenarioProgress) {
+          dispatch(scenarios[activeScenario].steps[scenarioProgress][1]);
+          scenarioProgress += 1;
+          renderScenario();
+        }
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        state = BrokerModel.initial();
+        scenarioProgress = 0;
+        render();
+        renderScenario();
+      });
+
+      render();
+      renderScenario();
+    </script>
+  </body>
+</html>
